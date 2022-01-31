@@ -1,31 +1,20 @@
 #include<iostream>
 
-#include"ray.h"
+#include "sphere.h"
+#include "hittable_list.h"
+#include "rtweekend.h"
 
-double hit_sphere(const vec3& center, double radius, const ray& r)
-{
-	vec3 cp = r.origin() - center;
-	double a = dot(r.direction(), r.direction());
-	double b = 2.0 * dot(cp, r.direction());
-	double c = dot(cp, cp) - radius * radius;
-	double discriminant = b * b - 4 * a * c;
-	if (discriminant < 0)
-		return -1;
-	else
-		return (-b - sqrt(discriminant)) / (2.0 * a);
-}
+using std::make_shared;
 
-vec3 ray_color(const ray& r)
+vec3 ray_color(const ray& r,const hittable_list& world)
 {
-	double t = hit_sphere(vec3(0, 0, -1), 0.5, r);
-	if (t > 0.0)
+	hit_record record;
+	if (world.hit(r, 0, infinity, record))
 	{
-		vec3 point = r.at(t);
-		vec3 N = unit_vecotr(point - vec3(0, 0, -1));
-		return (N + 1.0) * 0.5;
+		return (record.normal + 1.0) * 0.5;
 	}
 	vec3 unit_direction = unit_vecotr(r.direction());
-	t = (unit_direction.y() + 1.0) * 0.5;
+	double t = (unit_direction.y() + 1.0) * 0.5;
 	return (1.0 - t) * vec3(1.0, 1.0, 1.0) + t * vec3(0.5, 0.7, 1.0);
 }
 
@@ -40,6 +29,12 @@ void main()
 	vec3 horizontal(4.0, 0.0, 0.0);
 	vec3 vertical(0.0, 2.0, 0.0);
 	vec3 origin(0.0, 0.0, 0.0);
+
+	hittable_list world;
+	//world.add(make_shared<sphere>(vec3(0, 0, -1), 0.5));
+	world.add(make_shared<sphere>(vec3(0, 0, -1), 0.5));
+	world.add(make_shared<sphere>(vec3(0, -100.5, -1), 100));
+
 	for (int j = image_height - 1; j >= 0; j--)
 	{
 		std::cerr << "\rScanlines remaining: " << j << ' ' << std::flush;
@@ -49,7 +44,7 @@ void main()
 			auto v = double(j) / image_height;
 			ray r(origin, lower_left_corner + horizontal * u + vertical * v);
 			
-			vec3 color = ray_color(r);
+			vec3 color = ray_color(r, world);
 			color.write_color(std::cout);
 		}
 	}
