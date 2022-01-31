@@ -93,4 +93,8 @@ inline vec3 unit_vecotr(vec3 v)
 {
 	return v / v.length();
 }
+inline vec3 operator+(const vec3& v, double t)
+{
+	return vec3(v.e[0] + t, v.e[1] + t, v.e[2] + t);
+}
 #endif
