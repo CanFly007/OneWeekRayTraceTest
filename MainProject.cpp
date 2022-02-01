@@ -4,6 +4,7 @@
 #include "hittable_list.h"
 #include "rtweekend.h"
 #include "camera.h"
+#include "material.h"
 
 using std::make_shared;
 
@@ -15,9 +16,13 @@ vec3 ray_color(const ray& r,const hittable_list& world,int depth)
 	hit_record record;
 	if (world.hit(r, 0.001, infinity, record))
 	{
-		vec3 target = record.point + record.normal + random_unit_vector();
-		return 0.5 * ray_color(ray(record.point, target - record.point), world, depth - 1);
-		//return (record.normal + 1.0) * 0.5;
+		vec3 atten;
+		ray scattered;
+		if (record.mat_ptr->scatter(r, record, atten, scattered))
+		{
+			return atten * ray_color(scattered, world, depth - 1);
+		}
+		return vec3(0, 0, 0);
 	}
 	vec3 unit_direction = unit_vecotr(r.direction());
 	double t = (unit_direction.y() + 1.0) * 0.5;
@@ -39,8 +44,11 @@ void main()
 	vec3 origin(0.0, 0.0, 0.0);
 
 	hittable_list world;
-	world.add(make_shared<sphere>(vec3(0, 0, -1), 0.5));
-	world.add(make_shared<sphere>(vec3(0, -100.5, -1), 100));
+	world.add(make_shared<sphere>(vec3(0, 0, -1), 0.5, make_shared<lambertian>(vec3(0.7, 0.3, 0.3))));
+	world.add(make_shared<sphere>(vec3(0, -100.5, -1), 100, make_shared<lambertian>(vec3(0.8, 0.8, 0.0))));
+
+	world.add(make_shared<sphere>(vec3(1, 0, -1), 0.5, make_shared<metal>(vec3(0.8, 0.6, 0.2))));
+	world.add(make_shared<sphere>(vec3(-1, 0, -1), 0.5, make_shared<metal>(vec3(0.8, 0.8, 0.8))));
 	camera cam;
 
 	for (int j = image_height - 1; j >= 0; j--)
