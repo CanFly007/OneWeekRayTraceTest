@@ -3,15 +3,21 @@
 #include "sphere.h"
 #include "hittable_list.h"
 #include "rtweekend.h"
+#include "camera.h"
 
 using std::make_shared;
 
-vec3 ray_color(const ray& r,const hittable_list& world)
+vec3 ray_color(const ray& r,const hittable_list& world,int depth)
 {
+	if (depth <= 0)
+		return vec3(0, 0, 0);
+
 	hit_record record;
-	if (world.hit(r, 0, infinity, record))
+	if (world.hit(r, 0.001, infinity, record))
 	{
-		return (record.normal + 1.0) * 0.5;
+		vec3 target = record.point + record.normal + random_unit_vector();
+		return 0.5 * ray_color(ray(record.point, target - record.point), world, depth - 1);
+		//return (record.normal + 1.0) * 0.5;
 	}
 	vec3 unit_direction = unit_vecotr(r.direction());
 	double t = (unit_direction.y() + 1.0) * 0.5;
@@ -22,6 +28,8 @@ void main()
 {
 	const int image_width = 200;
 	const int image_height = 100;
+	const int samplers_per_pixel = 100;
+	const int max_depth = 50;
 
 	std::cout << "P3\n" << image_width << " " << image_height << "\n255\n";
 	
@@ -31,21 +39,24 @@ void main()
 	vec3 origin(0.0, 0.0, 0.0);
 
 	hittable_list world;
-	//world.add(make_shared<sphere>(vec3(0, 0, -1), 0.5));
 	world.add(make_shared<sphere>(vec3(0, 0, -1), 0.5));
 	world.add(make_shared<sphere>(vec3(0, -100.5, -1), 100));
+	camera cam;
 
 	for (int j = image_height - 1; j >= 0; j--)
 	{
 		std::cerr << "\rScanlines remaining: " << j << ' ' << std::flush;
 		for (int i = 0; i < image_width; i++)
 		{
-			auto u = double(i) / image_width;
-			auto v = double(j) / image_height;
-			ray r(origin, lower_left_corner + horizontal * u + vertical * v);
-			
-			vec3 color = ray_color(r, world);
-			color.write_color(std::cout);
+			vec3 color(0, 0, 0);
+			for (int s = 0; s < samplers_per_pixel; s++)
+			{
+				double u = (i + random_double()) / image_width;
+				double v = (j + random_double()) / image_height;
+				ray r = cam.get_ray(u, v);
+				color += ray_color(r, world, max_depth);
+			}
+			color.write_color(std::cout, samplers_per_pixel);
 		}
 	}
 	std::cerr << "\nDone.\n";
