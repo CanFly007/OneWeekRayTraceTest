@@ -2,6 +2,7 @@
 #define VEC3_H
 
 #include<iostream>
+#include "rtweekend.h"
 
 class vec3
 {
@@ -42,12 +43,17 @@ public:
 	{
 		return e[0] * e[0] + e[1] * e[1] + e[2] * e[2];
 	}
-	void write_color(std::ostream& out)
+	void write_color(std::ostream& out,int samples_per_pixel)
 	{
-		out << static_cast<int>(255.99 * e[0]) << ' '
-			<< static_cast<int>(255.99 * e[1]) << ' '
-			<< static_cast<int>(255.99 * e[2]) << '\n';
+		double scale = 1.0 / samples_per_pixel;
+		double r = sqrt(e[0] * scale);//sqrt for gamma correct
+		double g = sqrt(e[1] * scale);
+		double b = sqrt(e[2] * scale);
+		out << static_cast<int>(255.99 * clamp(r, 0.0, 0.999)) << ' '
+			<< static_cast<int>(255.99 * clamp(g, 0.0, 0.999)) << ' '
+			<< static_cast<int>(255.99 * clamp(b, 0.0, 0.999)) << '\n';
 	}
+
 public:
 	double e[3];
 };
@@ -96,5 +102,21 @@ inline vec3 unit_vecotr(vec3 v)
 inline vec3 operator+(const vec3& v, double t)
 {
 	return vec3(v.e[0] + t, v.e[1] + t, v.e[2] + t);
+}
+inline static vec3 random()
+{
+	return vec3(random_double(), random_double(), random_double());
+}
+inline static vec3 random(double min, double max)
+{
+	return vec3(random_double(min, max), random_double(min, max), random_double(min, max));
+}
+
+vec3 random_unit_vector()
+{
+	double a = random_double(0, 2 * pi);
+	double z = random_double(-1, 1);
+	double r = sqrt(1 - z * z);
+	return vec3(cos(a) * r, sin(a) * r, z);
 }
 #endif
