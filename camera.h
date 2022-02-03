@@ -6,12 +6,21 @@
 class camera
 {
 public:
-	camera()
+	camera(vec3 lookfrom, vec3 lookat, vec3 vup, double fov, double aspect)
 	{
-		origin = vec3(0.0, 0.0, 0.0);
-		lower_left_corner = vec3(-2.0, -1.0, -1.0);
-		horizontal = vec3(4.0, 0.0, 0.0);
-		vertical = vec3(0.0, 2.0, 0.0);
+
+		origin = lookfrom;
+		double radians = degrees_to_radians(fov);
+		double halfHeight = tan(radians * 0.5);
+		double halfWidth = halfHeight * aspect;
+
+		vec3 z = unit_vecotr(lookfrom - lookat);
+		vec3 x = unit_vecotr(cross(vup, z));
+		vec3 y = cross(z, x);
+
+		lower_left_corner = origin - halfWidth * x - halfHeight * y - z;
+		horizontal = 2 * halfWidth * x;
+		vertical = 2 * halfHeight * y;
 	}
 
 	ray get_ray(double u, double v)
