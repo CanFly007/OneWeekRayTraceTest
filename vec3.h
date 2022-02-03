@@ -43,6 +43,16 @@ public:
 	{
 		return e[0] * e[0] + e[1] * e[1] + e[2] * e[2];
 	}
+
+	inline static vec3 random()
+	{
+		return vec3(random_double(), random_double(), random_double());
+	}
+	inline static vec3 random(double min, double max)
+	{
+		return vec3(random_double(min, max), random_double(min, max), random_double(min, max));
+	}
+
 	void write_color(std::ostream& out,int samples_per_pixel)
 	{
 		double scale = 1.0 / samples_per_pixel;
@@ -103,14 +113,6 @@ inline vec3 operator+(const vec3& v, double t)
 {
 	return vec3(v.e[0] + t, v.e[1] + t, v.e[2] + t);
 }
-inline static vec3 random()
-{
-	return vec3(random_double(), random_double(), random_double());
-}
-inline static vec3 random(double min, double max)
-{
-	return vec3(random_double(min, max), random_double(min, max), random_double(min, max));
-}
 
 vec3 random_unit_vector()
 {
@@ -118,6 +120,16 @@ vec3 random_unit_vector()
 	double z = random_double(-1, 1);
 	double r = sqrt(1 - z * z);
 	return vec3(cos(a) * r, sin(a) * r, z);
+}
+
+vec3 random_in_unit_sphere()
+{
+	while (true)
+	{
+		vec3 p = vec3::random(-1, 1);
+		if (p.length_squared() >= 1)continue;
+		return p;
+	}
 }
 
 vec3 reflect(const vec3& v, const vec3& n)
