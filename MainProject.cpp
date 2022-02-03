@@ -39,9 +39,11 @@ void main()
 	std::cout << "P3\n" << image_width << " " << image_height << "\n255\n";
 	
 	//camera
-	vec3 lookfrom(-2, 2, 1);
-	vec3 lookat(0, -1, 0);
+	vec3 lookfrom(3, 3, 2);
+	vec3 lookat(0, 0, -1);
 	vec3 vup(0, 1, 0);
+	auto dist_to_focus = (lookfrom - lookat).length();
+	auto aperture = 2.0;
 
 	hittable_list world;
 	world.add(make_shared<sphere>(vec3(0, 0, -1), 0.5, make_shared<lambertian>(vec3(0.1, 0.2, 0.5))));
@@ -50,7 +52,7 @@ void main()
 	world.add(make_shared<sphere>(vec3(-1, 0, -1), 0.5, make_shared<dielectric>(1.5)));
 	world.add(make_shared<sphere>(vec3(-1, 0, -1), -0.45, make_shared<dielectric>(1.5)));//trick
 	world.add(make_shared<sphere>(vec3(1, 0, -1), 0.5, make_shared<metal>(vec3(0.8, 0.6, 0.2), 1.0)));
-	camera cam(lookfrom, lookat, vup, 90, double(image_width) / image_height);
+	camera cam(lookfrom, lookat, vup, 20, double(image_width) / image_height, aperture, dist_to_focus);
 
 	for (int j = image_height - 1; j >= 0; j--)
 	{
