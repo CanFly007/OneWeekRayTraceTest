@@ -1,6 +1,7 @@
 #ifndef MATERIAL_H
 #define MATERIAL_H
 
+#include "rtweekend.h"
 #include "hittable.h"
 
 class material
@@ -17,7 +18,7 @@ public:
 	virtual bool scatter(const ray& r_in, const hit_record& record, vec3& atten, ray& scattered)const
 	{
 		atten = albedo;
-		scattered = ray(record.point, vec3(record.normal + random_unit_vector()));
+		scattered = ray(record.point, vec3(record.normal + random_unit_vector()), r_in.time());
 		return true;
 	}
 public:
