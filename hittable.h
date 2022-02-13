@@ -1,7 +1,8 @@
 #ifndef HITTABLE_H
 #define HITTABLE_H
 
-#include "ray.h"
+#include "rtweekend.h"
+#include "aabb.h"
 
 class material;
 
@@ -24,5 +25,7 @@ class hittable
 {
 public:
 	virtual bool hit(const ray& r, double t_min, double t_max, hit_record& rec)const = 0;
+	//每个hittable物体需要一个aabb盒子
+	virtual bool bounding_box(double t0, double t1, aabb& output_box)const = 0;
 };
 #endif
