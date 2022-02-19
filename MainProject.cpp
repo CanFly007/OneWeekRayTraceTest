@@ -2,6 +2,7 @@
 
 #include "rtweekend.h"
 
+#include "bvh.h"
 #include "camera.h"
 #include "hittable_list.h"
 #include "material.h"
@@ -78,6 +79,7 @@ hittable_list random_scene()
 
 	world.add(make_shared<sphere>(vec3(4, 1, 0), 1.0, make_shared<metal>(vec3(0.7, 0.6, 0.5), 0.0)));
 
+	return static_cast<hittable_list>(make_shared<bvh_node>(world, 0, 1));
 	return world;
 }
 
