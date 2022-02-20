@@ -4,6 +4,8 @@
 #include "rtweekend.h"
 #include "hittable.h"
 
+#include "texture.h"
+
 class material
 {
 public:
@@ -13,16 +15,16 @@ public:
 class lambertian :public material
 {
 public:
-	lambertian(const vec3& a) :albedo(a) {}
+	lambertian(shared_ptr<texture> a) :albedo(a) {}
 
 	virtual bool scatter(const ray& r_in, const hit_record& record, vec3& atten, ray& scattered)const
 	{
-		atten = albedo;
+		atten = albedo->value(record.u, record.v, record.point);
 		scattered = ray(record.point, vec3(record.normal + random_unit_vector()), r_in.time());
 		return true;
 	}
 public:
-	vec3 albedo;
+	shared_ptr<texture> albedo;
 };
 
 class metal :public material

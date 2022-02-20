@@ -8,6 +8,7 @@
 #include "material.h"
 #include "moving_sphere.h"
 #include "sphere.h"
+#include "texture.h"
 
 using std::make_shared;
 
@@ -32,11 +33,24 @@ vec3 ray_color(const ray& r,const hittable_list& world,int depth)
 	return (1.0 - t) * vec3(1.0, 1.0, 1.0) + t * vec3(0.5, 0.7, 1.0);
 }
 
+hittable_list two_spheres()
+{
+	hittable_list objects;
+	auto checker = make_shared<checker_texture>(make_shared<constant_texture>(vec3(0.2, 0.3, 0.1)),
+												make_shared<constant_texture>(vec3(0.9, 0.9, 0.9)));
+	objects.add(make_shared<sphere>(vec3(0, -10, 0), 10, make_shared<lambertian>(checker)));
+	objects.add(make_shared<sphere>(vec3(0, 10, 0), 10, make_shared<lambertian>(checker)));
+	return objects;
+}
+
 hittable_list random_scene()
 {
 	hittable_list world;
 
-	world.add(make_shared<sphere>(vec3(0, -1000, 0), 1000, make_shared<lambertian>(vec3(0.5, 0.5, 0.5))));
+	auto checker = make_shared<checker_texture>(make_shared<constant_texture>(vec3(0.2, 0.3, 0.1)),
+												make_shared<constant_texture>(vec3(0.9, 0.9, 0.9)));
+
+	world.add(make_shared<sphere>(vec3(0, -1000, 0), 1000, make_shared<lambertian>(checker)));
 
 	int i = 1;
 	for (int a = -11; a < 11; a++)
@@ -55,8 +69,8 @@ hittable_list random_scene()
 					//	make_shared<moving_sphere>(center, 
 					//		center + vec3(0, random_double(0, 0.5), 0), 0.0, 1.0,
 					//		0.2, make_shared<lambertian>(albedo)));
-					world.add(
-						make_shared<sphere>(center, 0.2, make_shared<lambertian>(albedo))
+					//world.add(
+					//	make_shared<sphere>(center, 0.2, make_shared<lambertian>(albedo))
 					);
 				}
 				else if (choose_mat < 0.95)
@@ -78,7 +92,7 @@ hittable_list random_scene()
 
 	world.add(make_shared<sphere>(vec3(0, 1, 0), 1.0, make_shared<dielectric>(1.5)));
 
-	world.add(make_shared<sphere>(vec3(-4, 1, 0), 1.0, make_shared<lambertian>(vec3(0.4, 0.2, 0.1))));
+	//world.add(make_shared<sphere>(vec3(-4, 1, 0), 1.0, make_shared<lambertian>(vec3(0.4, 0.2, 0.1))));
 
 	world.add(make_shared<sphere>(vec3(4, 1, 0), 1.0, make_shared<metal>(vec3(0.7, 0.6, 0.5), 0.0)));
 
@@ -103,7 +117,7 @@ void main()
 	auto dist_to_focus = 10;
 	auto aperture = 0.1;
 
-	hittable_list world = random_scene();
+	hittable_list world = two_spheres();
 	camera cam(lookfrom, lookat, vup, 20, double(image_width) / image_height, aperture, dist_to_focus);
 
 	for (int j = image_height - 1; j >= 0; j--)

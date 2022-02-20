@@ -11,6 +11,8 @@ struct hit_record
 	vec3 point;
 	vec3 normal;
 	double t;
+	double u;
+	double v;
 	bool front_face;
 	shared_ptr<material> mat_ptr;
 
