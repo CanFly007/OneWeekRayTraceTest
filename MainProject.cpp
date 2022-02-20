@@ -10,6 +10,9 @@
 #include "sphere.h"
 #include "texture.h"
 
+#define STB_IMAGE_IMPLEMENTATION
+#include "stb_image.h"
+
 using std::make_shared;
 
 vec3 ray_color(const ray& r,const hittable_list& world,int depth)
@@ -71,7 +74,7 @@ hittable_list random_scene()
 					//		0.2, make_shared<lambertian>(albedo)));
 					//world.add(
 					//	make_shared<sphere>(center, 0.2, make_shared<lambertian>(albedo))
-					);
+					//);
 				}
 				else if (choose_mat < 0.95)
 				{
@@ -100,6 +103,15 @@ hittable_list random_scene()
 	return world;
 }
 
+hittable_list earth()
+{
+	int nx, ny, nn;
+	unsigned char* texture_data = stbi_load("earthmap.jpg", &nx, &ny, &nn, 0);
+	shared_ptr<lambertian> earth_surface = make_shared<lambertian>(make_shared<image_texture>(texture_data, nx, ny));
+	shared_ptr<hittable> globe = make_shared<sphere>(vec3(0, 0, 0), 2, earth_surface);
+	return hittable_list(globe);
+}
+
 void main()
 {
 	const auto aspect_ratio = 16.0 / 9.0;
@@ -116,8 +128,7 @@ void main()
 	vec3 vup(0, 1, 0);
 	auto dist_to_focus = 10;
 	auto aperture = 0.1;
-
-	hittable_list world = two_spheres();
+	hittable_list world = earth();
 	camera cam(lookfrom, lookat, vup, 20, double(image_width) / image_height, aperture, dist_to_focus);
 
 	for (int j = image_height - 1; j >= 0; j--)

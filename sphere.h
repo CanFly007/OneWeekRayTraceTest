@@ -16,6 +16,15 @@ public:
 	vec3 center;
 	double radius;
 	shared_ptr<material> mat_ptr;
+
+private:
+	void get_sphere_uv(const vec3& p, double& u, double& v)
+	{
+		auto phi = atan2(p.z(), p.x());
+		auto theta = asin(p.y());
+		u = 1 - (phi + pi) / (2 * pi);
+		v = (theta + pi / 2) / pi;
+	}
 };
 
 bool sphere::hit(const ray& r, double t_min, double t_max, hit_record& rec)const

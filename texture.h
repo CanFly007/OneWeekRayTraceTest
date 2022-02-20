@@ -44,4 +44,40 @@ public:
 	shared_ptr<texture> even;
 };
 
+class image_texture :public texture
+{
+public:
+	image_texture() {}
+	image_texture(unsigned char* pixels, int A, int B) :data(pixels), nx(A), ny(B) {}
+	~image_texture()
+	{
+		delete data;
+	}
+
+	virtual vec3 value(double u, double v, const vec3& p)const
+	{
+		if (data == nullptr)
+			return vec3(1, 0, 1);
+
+		int i = static_cast<int>(u * nx);
+		int j = static_cast<int>((1 - v) * ny - 0.001);
+
+		//clamp(i, 0, nx - 1);
+		//clamp(j, 0, ny - 1);
+		if (i < 0) i = 0;
+		if (j < 0) j = 0;
+		if (i > nx - 1) i = nx - 1;
+		if (j > ny - 1) j = ny - 1;
+
+		int r = static_cast<int>(data[3 * (i + nx * j) + 0]) / 255.0;
+		int g = static_cast<int>(data[3 * (i + nx * j) + 1]) / 255.0;
+		int b = static_cast<int>(data[3 * (i + nx * j) + 2]) / 255.0;
+		return vec3(r, g, b);
+	}
+
+public:
+	unsigned char* data;
+	int nx, ny;
+};
+
 #endif // !TEXTURE_H
