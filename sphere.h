@@ -18,7 +18,7 @@ public:
 	shared_ptr<material> mat_ptr;
 
 private:
-	void get_sphere_uv(const vec3& p, double& u, double& v)
+	static void get_sphere_uv(const vec3& p, double& u, double& v)
 	{
 		auto phi = atan2(p.z(), p.x());
 		auto theta = asin(p.y());
@@ -44,6 +44,7 @@ bool sphere::hit(const ray& r, double t_min, double t_max, hit_record& rec)const
 			vec3 outwardNormal = (rec.point - center) / radius;
 			rec.set_face_normal(r, outwardNormal);//如果从内部射入，法线也是朝向内部的
 			rec.mat_ptr = mat_ptr;
+			get_sphere_uv(outwardNormal, rec.u, rec.v);
 			return true;
 		}
 		t = (-b + sqrt(discriminant)) / (2.0 * a);
@@ -54,6 +55,7 @@ bool sphere::hit(const ray& r, double t_min, double t_max, hit_record& rec)const
 			vec3 outwardNormal = (rec.point - center) / radius;
 			rec.set_face_normal(r, outwardNormal);
 			rec.mat_ptr = mat_ptr;
+			get_sphere_uv(outwardNormal, rec.u, rec.v);
 			return true;
 		}
 	}
