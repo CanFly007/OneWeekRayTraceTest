@@ -2,6 +2,7 @@
 
 #include "rtweekend.h"
 
+#include "aarect.h"
 #include "bvh.h"
 #include "camera.h"
 #include "hittable_list.h"
@@ -21,19 +22,17 @@ vec3 ray_color(const ray& r,const hittable_list& world,int depth)
 		return vec3(0, 0, 0);
 
 	hit_record record;
-	if (world.hit(r, 0.001, infinity, record))
-	{
-		vec3 atten;
-		ray scattered;
-		if (record.mat_ptr->scatter(r, record, atten, scattered))
-		{
-			return atten * ray_color(scattered, world, depth - 1);
-		}
-		return vec3(0, 0, 0);
-	}
-	vec3 unit_direction = unit_vecotr(r.direction());
-	double t = (unit_direction.y() + 1.0) * 0.5;
-	return (1.0 - t) * vec3(1.0, 1.0, 1.0) + t * vec3(0.5, 0.7, 1.0);
+	if (!world.hit(r, 0.001, infinity, record))
+		return vec3(0,0,0);
+		//return background;		
+
+	vec3 atten;
+	ray scattered;
+	vec3 emitted = record.mat_ptr->emitted(record.u, record.v, record.point);
+	if (!record.mat_ptr->scatter(r, record, atten, scattered))
+		return emitted;
+
+	return emitted + atten * ray_color(scattered, world, depth - 1);
 }
 
 hittable_list two_spheres()
@@ -112,6 +111,21 @@ hittable_list earth()
 	return hittable_list(globe);
 }
 
+hittable_list simple_light()
+{
+	hittable_list objects;
+	auto checker = make_shared<checker_texture>(make_shared<constant_texture>(vec3(0.2, 0.3, 0.1)),
+												make_shared<constant_texture>(vec3(0.9, 0.9, 0.9)));
+	objects.add(make_shared<sphere>(vec3(0, -1000, 0), 1000, make_shared<lambertian>(checker)));
+	objects.add(make_shared<sphere>(vec3(0, 2, 0), 2, make_shared<lambertian>(checker)));
+
+	shared_ptr<diffuse_light> difflight = make_shared<diffuse_light>(make_shared<constant_texture>(vec3(4, 4, 4)));
+	objects.add(make_shared<sphere>(vec3(0, 7, 0), 2, difflight));
+	objects.add(make_shared<xy_rect>(3, 5, 1, 3, -2, difflight));
+
+	return objects;
+}
+
 void main()
 {
 	const auto aspect_ratio = 16.0 / 9.0;
@@ -128,7 +142,7 @@ void main()
 	vec3 vup(0, 1, 0);
 	auto dist_to_focus = 10;
 	auto aperture = 0.1;
-	hittable_list world = earth();
+	hittable_list world = simple_light();
 	camera cam(lookfrom, lookat, vup, 20, double(image_width) / image_height, aperture, dist_to_focus);
 
 	for (int j = image_height - 1; j >= 0; j--)
