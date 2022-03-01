@@ -150,10 +150,53 @@ hittable_list cornell_box()
 	return objects;
 }
 
+hittable_list final_scene()
+{
+	hittable_list boxes1;
+	shared_ptr<material> ground = make_shared<lambertian>(make_shared<constant_texture>(vec3(0.48, 0.83, 0.53)));
+
+	const int boxes_per_side = 20;
+	for (int i = 0; i < boxes_per_side; i++)
+	{
+		for (int j = 0; j < boxes_per_side; j++)
+		{
+			double w = 100.0;
+			double x0 = -1000.0 + i * w;
+			double z0 = -1000.0 + j * w;
+			double y0 = 0.0;
+			double x1 = x0 + w;
+			double y1 = random_double(1, 101);
+			double z1 = z0 + w;
+
+			boxes1.add(make_shared<box>(vec3(x0, y0, z0), vec3(x1, y1, z1), ground));
+		}
+	}
+
+	hittable_list objects;
+	objects.add(make_shared<bvh_node>(boxes1, 0, 1));
+
+	shared_ptr<material> light = make_shared<diffuse_light>(make_shared<constant_texture>(vec3(7, 7, 7)));
+	objects.add(make_shared<xz_rect>(123, 423, 147, 412, 554, light));
+
+	objects.add(make_shared<sphere>(vec3(260, 150, 45), 50, make_shared<dielectric>(1.5)));
+	objects.add(make_shared<sphere>(vec3(0, 150, 145), 50, make_shared<metal>(vec3(0.8, 0.8, 0.9), 10.0)));
+
+	hittable_list boxes2;
+	shared_ptr<material> white = make_shared<lambertian>(make_shared<constant_texture>(vec3(0.73, 0.73, 0.73)));
+	int ns = 1000;
+	for (int j = 0; j < ns; j++)
+	{
+		boxes2.add(make_shared<sphere>(vec3::random(0, 165), 10, white));
+	}
+	objects.add(make_shared<translate>(make_shared<bvh_node>(boxes2, 0.0, 1.0), vec3(-100, 270, 395)));
+
+	return objects;
+}
+
 void main()
 {
 	const auto aspect_ratio = 16.0 / 9.0;
-	const int image_width = 1200;
+	const int image_width = 600;
 	const int image_height = static_cast<int>(image_width / aspect_ratio);
 	const int samplers_per_pixel = 100;
 	const int max_depth = 50;
@@ -161,12 +204,12 @@ void main()
 	std::cout << "P3\n" << image_width << " " << image_height << "\n255\n";
 	
 	//camera
-	vec3 lookfrom(278, 278, -800);
+	vec3 lookfrom(478, 278, -600);
 	vec3 lookat(278, 278, 0);
 	vec3 vup(0, 1, 0);
 	auto dist_to_focus = 10;
 	auto aperture = 0.0;
-	hittable_list world = cornell_box();
+	hittable_list world = final_scene();
 	camera cam(lookfrom, lookat, vup, 40, double(image_width) / image_height, aperture, dist_to_focus);
 
 	for (int j = image_height - 1; j >= 0; j--)
