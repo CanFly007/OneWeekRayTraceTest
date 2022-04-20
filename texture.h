@@ -69,9 +69,9 @@ public:
 		if (i > nx - 1) i = nx - 1;
 		if (j > ny - 1) j = ny - 1;
 
-		int r = static_cast<int>(data[3 * (i + nx * j) + 0]) / 255.0;
-		int g = static_cast<int>(data[3 * (i + nx * j) + 1]) / 255.0;
-		int b = static_cast<int>(data[3 * (i + nx * j) + 2]) / 255.0;
+		double r = static_cast<int>(data[3 * (i + nx * j) + 0]) / 255.0;
+		double g = static_cast<int>(data[3 * (i + nx * j) + 1]) / 255.0;
+		double b = static_cast<int>(data[3 * (i + nx * j) + 2]) / 255.0;
 		return vec3(r, g, b);
 	}
 
